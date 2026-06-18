@@ -84,11 +84,52 @@
 }
 
 .placar-header {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
+  gap: 1rem;
   padding: 1rem 1.5rem;
   border-bottom: 1px solid #1e3d2f;
+}
+
+.sets-placar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  justify-self: center;
+}
+
+.sets-time {
+  font-size: clamp(0.7rem, 2vw, 0.85rem);
+  color: #81c784;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.sets-valores {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sets-num {
+  font-size: clamp(1.5rem, 5vw, 2.25rem);
+  font-weight: 800;
+  color: #ffffff;
+  font-variant-numeric: tabular-nums;
+  min-width: 1.25ch;
+  text-align: center;
+}
+
+.sets-sep {
+  font-size: clamp(1rem, 3vw, 1.25rem);
+  color: #66bb6a;
+  font-weight: 600;
+}
+
+.placar-header p-tag {
+  justify-self: end;
 }
 
 .set-label {
@@ -96,6 +137,7 @@
   font-weight: 600;
   letter-spacing: 0.1em;
   color: #81c784;
+  justify-self: start;
 }
 
 .placar-main {
@@ -140,9 +182,28 @@
   font-variant-numeric: tabular-nums;
 }
 
-.time-sets {
-  font-size: clamp(0.9rem, 2.5vw, 1.25rem);
+.time-sets-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  margin-top: 0.25rem;
+}
+
+.time-sets-num {
+  font-size: clamp(2rem, 7vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1;
+  color: #4caf50;
+  font-variant-numeric: tabular-nums;
+}
+
+.time-sets-label {
+  font-size: clamp(0.75rem, 2vw, 0.95rem);
   color: #66bb6a;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 600;
 }
 
 .ponto-btn {

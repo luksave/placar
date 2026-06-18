@@ -51,7 +51,7 @@ export class PlacarComponent implements OnDestroy {
           this.messageService.add({
             severity: 'info',
             summary: 'Set encerrado',
-            detail: `Time ${evento.vencedor} venceu o set!`,
+            detail: `${this.labelTime(evento.vencedor!)} venceu o set!`,
             life: 2500,
           });
           break;
@@ -60,7 +60,7 @@ export class PlacarComponent implements OnDestroy {
             severity: 'success',
             summary: 'Partida encerrada',
             detail: evento.vencedor
-              ? `Time ${evento.vencedor} venceu a partida!`
+              ? `${this.labelTime(evento.vencedor)} venceu a partida!`
               : 'Partida finalizada.',
             life: 4000,
           });
@@ -182,7 +182,7 @@ export class PlacarComponent implements OnDestroy {
   }
 
   labelTime(time: Time): string {
-    return `Time ${time}`;
+    return time === 'A' ? 'Time 1' : 'Time 2';
   }
 
   statusMicrofone(): { label: string; severity: 'success' | 'warn' | 'danger' | 'secondary' } {

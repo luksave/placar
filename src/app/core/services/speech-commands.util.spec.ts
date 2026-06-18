@@ -1,36 +1,25 @@
-import { identificarComandos } from './speech-commands.util';
+import { identificarComandos, labelComando } from './speech-commands.util';
 
 describe('identificarComandos', () => {
-  it('should recognize a single point command', () => {
-    expect(identificarComandos('ponto a')).toEqual(['ponto_a']);
-    expect(identificarComandos('ponto b')).toEqual(['ponto_b']);
+  it('should recognize time 1 and time 2', () => {
+    expect(identificarComandos('time 1')).toEqual(['ponto_a']);
+    expect(identificarComandos('time 2')).toEqual(['ponto_b']);
   });
 
-  it('should recognize repeated same commands', () => {
-    expect(identificarComandos('ponto a ponto a')).toEqual(['ponto_a', 'ponto_a']);
+  it('should recognize time um and time dois', () => {
+    expect(identificarComandos('time um')).toEqual(['ponto_a']);
+    expect(identificarComandos('time dois')).toEqual(['ponto_b']);
   });
 
-  it('should recognize alternating point commands', () => {
-    expect(identificarComandos('ponto a ponto b')).toEqual(['ponto_a', 'ponto_b']);
+  it('should recognize repeated and alternating commands', () => {
+    expect(identificarComandos('time 1 time 1')).toEqual(['ponto_a', 'ponto_a']);
+    expect(identificarComandos('time 1 time 2')).toEqual(['ponto_a', 'ponto_b']);
+    expect(identificarComandos('time um time dois')).toEqual(['ponto_a', 'ponto_b']);
   });
 
-  it('should recognize merged transcript with shorthand B', () => {
-    expect(identificarComandos('ponto a .b')).toEqual(['ponto_a', 'ponto_b']);
-  });
-
-  it('should recognize conto variations', () => {
-    expect(identificarComandos('conto a conto b')).toEqual(['ponto_a', 'ponto_b']);
-  });
-
-  it('should recognize pontuar misrecognitions as ponto a', () => {
-    expect(identificarComandos('pontuar')).toEqual(['ponto_a']);
-    expect(identificarComandos('pontua')).toEqual(['ponto_a']);
-    expect(identificarComandos('pontuar a')).toEqual(['ponto_a']);
-  });
-
-  it('should recognize pontuar b as ponto b', () => {
-    expect(identificarComandos('pontuar b')).toEqual(['ponto_b']);
-    expect(identificarComandos('pontuar pontuar b')).toEqual(['ponto_a', 'ponto_b']);
+  it('should not recognize legacy ponto commands', () => {
+    expect(identificarComandos('ponto a')).toEqual([]);
+    expect(identificarComandos('pontuar')).toEqual([]);
   });
 
   it('should recognize phrase commands', () => {
@@ -46,5 +35,12 @@ describe('identificarComandos', () => {
 
   it('should return empty for unrecognized text', () => {
     expect(identificarComandos('olá mundo')).toEqual([]);
+  });
+});
+
+describe('labelComando', () => {
+  it('should label point commands as time 1 and time 2', () => {
+    expect(labelComando('ponto_a')).toBe('time 1');
+    expect(labelComando('ponto_b')).toBe('time 2');
   });
 });

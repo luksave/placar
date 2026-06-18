@@ -1,7 +1,7 @@
 import { Injectable, OnDestroy, inject, signal } from '@angular/core';
 import { PlacarService } from './placar.service';
 import { ComandoVoz } from '../models/placar.models';
-import { identificarComandos } from './speech-commands.util';
+import { identificarComandos, labelComando } from './speech-commands.util';
 
 interface SpeechRecognitionResultLike {
   isFinal: boolean;
@@ -262,7 +262,7 @@ export class SpeechRecognitionService implements OnDestroy {
     this.ultimoTexto.set(null);
 
     for (const comando of comandos) {
-      this.status.set(`Comando: ${comando.replace(/_/g, ' ')}`);
+      this.status.set(`Comando: ${labelComando(comando)}`);
       this.executarComando(comando);
     }
   }

@@ -27,6 +27,15 @@
   <div class="placar" [class.encerrada]="partidaEncerrada()">
     <header class="placar-header">
       <span class="set-label">SET {{ estado().setAtual }} / {{ maxSets }}</span>
+      <div class="sets-placar" aria-label="Placar de sets">
+        <span class="sets-time">{{ labelTime(timeEsquerda()) }}</span>
+        <span class="sets-valores">
+          <span class="sets-num">{{ setsEsquerda() }}</span>
+          <span class="sets-sep">×</span>
+          <span class="sets-num">{{ setsDireita() }}</span>
+        </span>
+        <span class="sets-time">{{ labelTime(timeDireita()) }}</span>
+      </div>
       <p-tag
         [value]="statusMicrofone().label"
         [severity]="statusMicrofone().severity"
@@ -45,7 +54,10 @@
       <section class="time-col esquerda" (click)="pontoEsquerda()">
         <span class="time-nome">{{ labelTime(timeEsquerda()) }}</span>
         <span class="time-pontos">{{ pontosEsquerda() }}</span>
-        <span class="time-sets">Sets: {{ setsEsquerda() }}</span>
+        <div class="time-sets-wrap">
+          <span class="time-sets-num">{{ setsEsquerda() }}</span>
+          <span class="time-sets-label">sets</span>
+        </div>
         <p-button
           class="ponto-btn"
           label="+1"
@@ -59,7 +71,10 @@
       <section class="time-col direita" (click)="pontoDireita()">
         <span class="time-nome">{{ labelTime(timeDireita()) }}</span>
         <span class="time-pontos">{{ pontosDireita() }}</span>
-        <span class="time-sets">Sets: {{ setsDireita() }}</span>
+        <div class="time-sets-wrap">
+          <span class="time-sets-num">{{ setsDireita() }}</span>
+          <span class="time-sets-label">sets</span>
+        </div>
         <p-button
           class="ponto-btn"
           label="+1"
@@ -128,7 +143,7 @@
             <p class="vencedor">Placar finalizado</p>
           }
           <p class="placar-final">
-            {{ estado().setsA }} x {{ estado().setsB }} (sets)
+            Sets: {{ labelTime('A') }} {{ estado().setsA }} × {{ labelTime('B') }} {{ estado().setsB }}
           </p>
           <p-button label="Nova partida" icon="pi pi-play" (onClick)="novaPartida()" />
         </div>

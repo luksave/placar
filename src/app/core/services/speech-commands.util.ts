@@ -1,13 +1,8 @@
 import { ComandoVoz } from '../models/placar.models';
 
 const NOVO_SET_PATTERN = /novo\s*(set|7|sete|sect|sept)\b/g;
-const RAIZ_PONTO = '(?:ponto|conto|pontu(?:a(?:r)?)?)';
-const PONTO_B_PATTERN = new RegExp(`${RAIZ_PONTO}\\s*\\.?\\s*b\\b|(?<![a-z.])\\.b\\b`, 'g');
-/** "pontuar" / "pontua" sem letra = confusão comum do motor de voz para "ponto a" */
-const PONTO_A_PATTERN = new RegExp(
-  `${RAIZ_PONTO}\\s*\\.?\\s*a\\b|(?<![a-z.])\\.a\\b|\\bpontua?r?\\b(?!\\s*\\.?\\s*[ab]\\b)`,
-  'g',
-);
+const TIME_1_PATTERN = /\btime\s*(?:1|um)\b/g;
+const TIME_2_PATTERN = /\btime\s*(?:2|dois)\b/g;
 
 interface MatchComando {
   index: number;
@@ -20,6 +15,23 @@ export function normalizarTranscricao(texto: string): string {
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase();
+}
+
+export function labelComando(comando: ComandoVoz): string {
+  switch (comando) {
+    case 'ponto_a':
+      return 'time 1';
+    case 'ponto_b':
+      return 'time 2';
+    case 'novo_set':
+      return 'novo set';
+    case 'inverter_lados':
+      return 'inverter lados';
+    case 'encerrar_partida':
+      return 'encerrar partida';
+    case 'desfazer':
+      return 'desfazer';
+  }
 }
 
 function coletarMatches(regex: RegExp, texto: string, comando: ComandoVoz): MatchComando[] {
@@ -43,8 +55,8 @@ export function identificarComandos(texto: string): ComandoVoz[] {
     ...coletarMatches(/encerrar partida/g, normalizado, 'encerrar_partida'),
     ...coletarMatches(/inverter lados/g, normalizado, 'inverter_lados'),
     ...coletarMatches(NOVO_SET_PATTERN, normalizado, 'novo_set'),
-    ...coletarMatches(PONTO_A_PATTERN, normalizado, 'ponto_a'),
-    ...coletarMatches(PONTO_B_PATTERN, normalizado, 'ponto_b'),
+    ...coletarMatches(TIME_1_PATTERN, normalizado, 'ponto_a'),
+    ...coletarMatches(TIME_2_PATTERN, normalizado, 'ponto_b'),
     ...coletarMatches(/\bdesfazer\b/g, normalizado, 'desfazer'),
   ];
 
