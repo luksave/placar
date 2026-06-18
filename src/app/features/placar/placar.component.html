@@ -1,0 +1,138 @@
+<p-toast position="top-center" />
+
+@if (!iniciado()) {
+  <div
+    class="landing"
+    (click)="iniciarPartida()"
+    (keyup.enter)="iniciarPartida()"
+    tabindex="0"
+    role="button"
+    [class.iniciando]="iniciando()"
+  >
+    <div class="landing-content">
+      <i class="pi pi-microphone landing-icon"></i>
+      <h1>Placar de Vôlei</h1>
+      @if (iniciando()) {
+        <p>Solicitando permissão do microfone...</p>
+      } @else {
+        <p>Toque para iniciar</p>
+      }
+      <span class="landing-hint">O navegador vai pedir acesso ao microfone</span>
+      @if (!suportadoVoz()) {
+        <span class="landing-aviso">⚠ Use Chrome ou Edge — Firefox não suporta voz</span>
+      }
+    </div>
+  </div>
+} @else {
+  <div class="placar" [class.encerrada]="partidaEncerrada()">
+    <header class="placar-header">
+      <span class="set-label">SET {{ estado().setAtual }} / {{ maxSets }}</span>
+      <p-tag
+        [value]="statusMicrofone().label"
+        [severity]="statusMicrofone().severity"
+        icon="pi pi-microphone"
+      />
+    </header>
+
+    @if (erroVoz()) {
+      <div class="alerta-mic">
+        <i class="pi pi-exclamation-triangle"></i>
+        {{ erroVoz() }}
+      </div>
+    }
+
+    <main class="placar-main">
+      <section class="time-col esquerda" (click)="pontoEsquerda()">
+        <span class="time-nome">{{ labelTime(timeEsquerda()) }}</span>
+        <span class="time-pontos">{{ pontosEsquerda() }}</span>
+        <span class="time-sets">Sets: {{ setsEsquerda() }}</span>
+        <p-button
+          class="ponto-btn"
+          label="+1"
+          (onClick)="pontoEsquerdaBtn($event)"
+          [disabled]="partidaEncerrada()"
+        />
+      </section>
+
+      <div class="divisor"></div>
+
+      <section class="time-col direita" (click)="pontoDireita()">
+        <span class="time-nome">{{ labelTime(timeDireita()) }}</span>
+        <span class="time-pontos">{{ pontosDireita() }}</span>
+        <span class="time-sets">Sets: {{ setsDireita() }}</span>
+        <p-button
+          class="ponto-btn"
+          label="+1"
+          (onClick)="pontoDireitaBtn($event)"
+          [disabled]="partidaEncerrada()"
+        />
+      </section>
+    </main>
+
+    <footer class="placar-footer">
+      <div class="acoes">
+        <p-button
+          label="Desfazer"
+          icon="pi pi-undo"
+          severity="secondary"
+          (onClick)="desfazer()"
+          [disabled]="partidaEncerrada() || estado().historico.length === 0"
+        />
+        <p-button
+          label="Novo Set"
+          icon="pi pi-refresh"
+          severity="secondary"
+          (onClick)="novoSet()"
+          [disabled]="partidaEncerrada()"
+        />
+        <p-button
+          label="Inverter"
+          icon="pi pi-arrows-h"
+          severity="secondary"
+          (onClick)="inverterLados()"
+          [disabled]="partidaEncerrada()"
+        />
+        <p-button
+          [label]="ouvindo() ? 'Pausar mic' : 'Retomar mic'"
+          icon="pi pi-microphone"
+          severity="help"
+          (onClick)="alternarMicrofone()"
+          [disabled]="!suportadoVoz()"
+        />
+        <p-button
+          label="Encerrar"
+          icon="pi pi-stop"
+          severity="danger"
+          (onClick)="encerrarPartida()"
+          [disabled]="partidaEncerrada()"
+        />
+      </div>
+
+      <div class="voz-status">
+        @if (statusVoz()) {
+          <span class="status-linha">{{ statusVoz() }}</span>
+        }
+        @if (ultimoTexto()) {
+          <span class="ultimo-comando">Ouvido: "{{ ultimoTexto() }}"</span>
+        }
+      </div>
+    </footer>
+
+    @if (partidaEncerrada()) {
+      <div class="overlay">
+        <div class="overlay-content">
+          <h2>Partida encerrada</h2>
+          @if (vencedor()) {
+            <p class="vencedor">{{ labelTime(vencedor()!) }} venceu!</p>
+          } @else {
+            <p class="vencedor">Placar finalizado</p>
+          }
+          <p class="placar-final">
+            {{ estado().setsA }} x {{ estado().setsB }} (sets)
+          </p>
+          <p-button label="Nova partida" icon="pi pi-play" (onClick)="novaPartida()" />
+        </div>
+      </div>
+    }
+  </div>
+}

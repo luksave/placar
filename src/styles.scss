@@ -1,0 +1,19 @@
+@import 'primeicons/primeicons.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #0d1f17;
+  font-family: var(--font-family, system-ui, -apple-system, sans-serif);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
