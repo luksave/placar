@@ -45,8 +45,8 @@ Fale em português após permitir o microfone. O app mostra na barra inferior o 
 
 | Comando | Efeito | Variações aceitas |
 |---|---|---|
-| **ponto A** | +1 para o Time A | "ponto a", "conto a", ".a" |
-| **ponto B** | +1 para o Time B | "ponto b", "conto b", ".b" |
+| **ponto A** | +1 para o Time A | "ponto a", "conto a", "pontuar", "pontua", ".a" |
+| **ponto B** | +1 para o Time B | "ponto b", "conto b", "pontuar b", "pontua b", ".b" |
 | **desfazer** | Desfaz o último ponto | — |
 | **novo set** | Inicia um set manualmente | "novo 7", "novo sete", "novo sect" |
 | **inverter lados** | Troca os times na tela | — |

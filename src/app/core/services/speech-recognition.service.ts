@@ -1,6 +1,7 @@
 import { Injectable, OnDestroy, inject, signal } from '@angular/core';
-import { ComandoVoz } from '../models/placar.models';
 import { PlacarService } from './placar.service';
+import { ComandoVoz } from '../models/placar.models';
+import { identificarComandos } from './speech-commands.util';
 
 interface SpeechRecognitionResultLike {
   isFinal: boolean;
@@ -43,28 +44,15 @@ declare global {
   }
 }
 
-const COMANDOS: { frase: string; comando: ComandoVoz }[] = [
-  { frase: 'encerrar partida', comando: 'encerrar_partida' },
-  { frase: 'inverter lados', comando: 'inverter_lados' },
-  { frase: 'desfazer', comando: 'desfazer' },
-];
-
-/** Variações comuns do reconhecimento de voz */
-const NOVO_SET_PATTERN = /novo\s*(set|7|sete|sect|sept)\b/;
-const PONTO_A_PATTERN = /(?:ponto|conto)\s*\.?\s*a\b|\.a\b/;
-const PONTO_B_PATTERN = /(?:ponto|conto)\s*\.?\s*b\b|\.b\b/;
-
-const DEBOUNCE_MS = 800;
-
 @Injectable({ providedIn: 'root' })
 export class SpeechRecognitionService implements OnDestroy {
   private readonly placarService = inject(PlacarService);
 
   private recognition: SpeechRecognitionLike | null = null;
   private pausado = true;
-  private ultimoComando = '';
-  private ultimoComandoEm = 0;
   private reiniciarTimeout: ReturnType<typeof setTimeout> | null = null;
+  private segmentosProcessados = new Set<string>();
+  private sessaoReconhecimento = 0;
 
   readonly suportado = signal(this.verificarSuporte());
   readonly ouvindo = signal(false);
@@ -117,6 +105,7 @@ export class SpeechRecognitionService implements OnDestroy {
     this.ouvindo.set(false);
     this.status.set('Pausado');
     this.limparReinicio();
+    this.segmentosProcessados.clear();
 
     if (this.recognition) {
       this.recognition.onend = null;
@@ -151,6 +140,9 @@ export class SpeechRecognitionService implements OnDestroy {
       return;
     }
 
+    this.sessaoReconhecimento++;
+    this.segmentosProcessados.clear();
+
     this.recognition = new Construtor();
     this.recognition.lang = 'pt-BR';
     this.recognition.continuous = true;
@@ -164,17 +156,33 @@ export class SpeechRecognitionService implements OnDestroy {
     };
 
     this.recognition.onresult = (event) => {
+      let interimTexto: string | null = null;
+      const sessao = this.sessaoReconhecimento;
+
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const resultado = event.results[i];
         const texto = resultado[0].transcript.toLowerCase().trim();
 
-        if (!resultado.isFinal) {
-          this.ultimoTexto.set(`${texto}…`);
+        if (!texto) {
           continue;
         }
 
-        this.ultimoTexto.set(texto);
+        if (!resultado.isFinal) {
+          interimTexto = texto;
+          continue;
+        }
+
+        const chave = `${sessao}:${i}:${texto}`;
+        if (this.segmentosProcessados.has(chave)) {
+          continue;
+        }
+        this.segmentosProcessados.add(chave);
+
         this.processarTexto(texto);
+      }
+
+      if (interimTexto) {
+        this.ultimoTexto.set(`${interimTexto}…`);
       }
     };
 
@@ -243,46 +251,20 @@ export class SpeechRecognitionService implements OnDestroy {
   }
 
   private processarTexto(texto: string): void {
-    const comando = this.identificarComando(texto);
-    if (!comando) {
+    const comandos = identificarComandos(texto);
+
+    if (comandos.length === 0) {
+      this.ultimoTexto.set(texto);
       this.status.set(`Ouvido: "${texto}" — comando não reconhecido`);
       return;
     }
 
-    const agora = Date.now();
-    if (comando === this.ultimoComando && agora - this.ultimoComandoEm < DEBOUNCE_MS) {
-      return;
+    this.ultimoTexto.set(null);
+
+    for (const comando of comandos) {
+      this.status.set(`Comando: ${comando.replace(/_/g, ' ')}`);
+      this.executarComando(comando);
     }
-
-    this.ultimoComando = comando;
-    this.ultimoComandoEm = agora;
-    this.status.set(`Comando: ${comando.replace('_', ' ')}`);
-    this.executarComando(comando);
-  }
-
-  private identificarComando(texto: string): ComandoVoz | null {
-    const normalizado = texto
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '');
-
-    if (NOVO_SET_PATTERN.test(normalizado)) {
-      return 'novo_set';
-    }
-
-    if (PONTO_A_PATTERN.test(normalizado)) {
-      return 'ponto_a';
-    }
-
-    if (PONTO_B_PATTERN.test(normalizado)) {
-      return 'ponto_b';
-    }
-
-    for (const item of COMANDOS) {
-      if (normalizado.includes(item.frase)) {
-        return item.comando;
-      }
-    }
-    return null;
   }
 
   private executarComando(comando: ComandoVoz): void {
